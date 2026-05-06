@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LOKI's Food & Chopp — Costa Rica MS</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:ital,wght@0,400;0,600;0,700;1,400&family=Black+Ops+One&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:      #0a0808;
+      --surface: #110e0e;
+      --card:    #1a1515;
+      --border:  #2a1f1f;
+      --red:     #c8151b;
+      --red-deep:#8f0e12;
+      --ember:   #e05020;
+      --cream:   #f5ede0;
+      --muted:   #7a6060;
+      --radius:  12px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Barlow', sans-serif;
+      font-size: 16px;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* CURSOR */
+    #cursor {
+      width: 13px; height: 13px;
+      background: var(--red);
+      border-radius: 50%;
+      position: fixed; top: 0; left: 0;
+      pointer-events: none; z-index: 9999;
+      transform: translate(-50%,-50%);
+      transition: width .25s, height .25s, background .25s;
+      mix-blend-mode: difference;
+    }
+    #cursor.hovered { width: 42px; height: 42px; background: var(--ember); }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 800;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 60px;
+      backdrop-filter: blur(20px);
+      background: rgba(10,8,8,.75);
+      border-bottom: 1px solid rgba(200,21,27,.12);
+      transition: padding .3s;
+    }
+    nav.scrolled { padding: 12px 60px; }
+
+    .nav-logo { text-decoration: none; line-height: 1; display: flex; flex-direction: column; align-items: flex-start; }
+    .nav-logo-top {
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 25px; letter-spacing: 3px; color: #fff; line-height: 1;
+      display: flex; align-items: center; gap: 2px;
+    }
+    .nav-logo-top .logo-o {
+      position: relative; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .nav-logo-top .logo-o .flame-inner {
+      position: absolute; width: 55%; height: 55%;
+      color: var(--red);
+    }
+    .nav-logo-top .red { color: var(--red); }
+    .nav-logo-bottom {
+      font-family: 'Barlow', sans-serif; font-size: 9px;
+      letter-spacing: 3.5px; text-transform: uppercase;
+      color: rgba(245,237,224,.45); font-weight: 600; margin-top: 2px;
+    }
+
+    .nav-links { display: flex; gap: 30px; list-style: none; }
+    .nav-links a {
+      color: var(--cream); text-decoration: none;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      position: relative; transition: color .3s;
+    }
+    .nav-links a::after {
+      content: ''; position: absolute; bottom: -4px; left: 0;
+      width: 0; height: 2px; background: var(--red);
+      transition: width .35s cubic-bezier(.77,0,.175,1);
+    }
+    .nav-links a:hover { color: var(--red); }
+    .nav-links a:hover::after { width: 100%; }
+
+    .nav-cart-btn {
+      background: var(--red); color: #fff; border: none;
+      padding: 10px 20px; border-radius: 50px;
+      font-family: 'Barlow', sans-serif; font-weight: 700;
+      font-size: 13px; letter-spacing: 1px; cursor: none;
+      display: flex; align-items: center; gap: 8px;
+      transition: background .25s, transform .2s;
+    }
+    .nav-cart-btn:hover { background: var(--red-deep); transform: scale(1.05); }
+    .cart-count {
+      background: #fff; color: var(--red); border-radius: 50%;
+      width: 20px; height: 20px; display: flex; align-items: center;
+      justify-content: center; font-size: 11px; font-weight: 700;
+    }
+
+    /* HERO */
+    #hero {
+      min-height: 100vh; display: flex; align-items: center;
+      position: relative; overflow: hidden; padding: 120px 60px 80px;
+    }
+    .hero-bg {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 65% 55% at 68% 50%, rgba(200,21,27,.22) 0%, transparent 65%),
+        radial-gradient(ellipse 35% 45% at 20% 70%, rgba(224,80,32,.08) 0%, transparent 55%),
+        #0a0808;
+    }
+    .hero-grain {
+      position: absolute; inset: 0; pointer-events: none; opacity: .28;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");
+    }
+    .hero-content { position: relative; z-index: 2; max-width: 660px; }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(200,21,27,.12); border: 1px solid rgba(200,21,27,.35);
+      border-radius: 50px; padding: 6px 16px;
+      font-size: 12px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: #f08080; margin-bottom: 28px;
+      animation: fadeUp .8s ease both;
+    }
+    .hero-tag::before { content: '●'; color: var(--red); animation: blink 1.6s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+
+    /* BIG HERO LOGO */
+    .hero-logo-wrap { animation: fadeUp .85s .05s ease both; margin-bottom: 24px; }
+    .hero-logo-name {
+      font-family: 'Black Ops One', sans-serif;
+      font-size: clamp(72px, 11vw, 138px);
+      line-height: .9; letter-spacing: 4px; color: #fff;
+      display: flex; align-items: center; gap: 2px; flex-wrap: wrap;
+    }
+    .hero-logo-name .logo-o-hero {
+      position: relative; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .hero-logo-name .logo-o-hero .flame-inner {
+      position: absolute; width: 50%; height: 50%;
+      color: var(--red);
+    }
+    .hero-logo-name .red { color: var(--red); }
+    .hero-logo-sub {
+      font-family: 'Barlow', sans-serif;
+      font-size: clamp(13px,2vw,19px);
+      letter-spacing: 8px; text-transform: uppercase;
+      font-weight: 600; color: rgba(245,237,224,.4); margin-top: 4px;
+    }
+
+    .hero-phrase {
+      font-family: 'Barlow', sans-serif;
+      font-size: clamp(14px,1.8vw,18px);
+      font-style: italic; color: rgba(245,237,224,.58);
+      border-left: 3px solid var(--red); padding-left: 16px;
+      margin-bottom: 34px; animation: fadeUp .9s .2s ease both;
+    }
+
+    .hero-actions {
+      display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      animation: fadeUp .9s .3s ease both;
+    }
+    .btn-primary {
+      background: var(--red); color: #fff; border: none;
+      padding: 15px 32px; border-radius: 50px;
+      font-family: 'Barlow', sans-serif; font-weight: 700;
+      font-size: 14px; letter-spacing: 1px; cursor: none;
+      transition: background .25s, transform .2s, box-shadow .25s;
+      box-shadow: 0 8px 28px rgba(200,21,27,.3); text-decoration: none; display: inline-block;
+    }
+    .btn-primary:hover { background: var(--red-deep); transform: translateY(-3px); box-shadow: 0 14px 38px rgba(200,21,27,.42); }
+    .btn-outline {
+      background: transparent; color: var(--cream);
+      border: 1.5px solid rgba(245,237,224,.2);
+      padding: 14px 28px; border-radius: 50px;
+      font-family: 'Barlow', sans-serif; font-weight: 600;
+      font-size: 14px; letter-spacing: 1px; cursor: none;
+      transition: border-color .25s, color .25s, transform .2s;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-outline:hover { border-color: var(--red); color: var(--red); transform: translateY(-3px); }
+
+    .hero-img {
+      position: absolute; right: -40px; top: 50%;
+      transform: translateY(-50%);
+      width: 53vw; max-width: 730px;
+      border-radius: 40% 60% 55% 45% / 45% 40% 60% 55%;
+      overflow: hidden; z-index: 1;
+      animation: floatBob 7s ease-in-out infinite;
+      box-shadow: 0 30px 80px rgba(0,0,0,.65), 0 0 0 1px rgba(200,21,27,.14);
+    }
+    .hero-img img { width: 100%; height: 100%; object-fit: cover; transform: scale(1.08); }
+    @keyframes floatBob {
+      0%,100%{transform:translateY(-50%) translateX(0)}
+      50%{transform:translateY(-52%) translateX(-8px)}
+    }
+
+    .hero-stats {
+      display: flex; gap: 40px; margin-top: 48px;
+      animation: fadeUp .9s .42s ease both;
+    }
+    .stat-num { font-family: 'Bebas Neue', sans-serif; font-size: 38px; color: var(--red); line-height: 1; }
+    .stat-label { font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(26px)} to{opacity:1;transform:none} }
+
+    /* MARQUEE */
+    .marquee-wrap {
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+      background: var(--surface); overflow: hidden; padding: 12px 0;
+    }
+    .marquee-track {
+      display: flex; width: max-content;
+      animation: marqueeScroll 24s linear infinite;
+    }
+    .marquee-item {
+      display: flex; align-items: center; gap: 12px; padding: 0 28px;
+      font-family: 'Bebas Neue', sans-serif; font-size: 17px;
+      letter-spacing: 3px; color: var(--muted); white-space: nowrap;
+    }
+    .marquee-item .mi { color: var(--red); font-size: 19px; }
+    @keyframes marqueeScroll { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+
+    /* SECTIONS */
+    section { padding: 100px 60px; }
+    .section-tag { font-size: 11px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--red); margin-bottom: 12px; }
+    h2 { font-family: 'Bebas Neue', sans-serif; font-size: clamp(44px,6vw,80px); line-height: 1; letter-spacing: 1px; }
+
+    .reveal { opacity:0; transform:translateY(34px); transition:opacity .8s ease, transform .8s ease; }
+    .reveal.visible { opacity:1; transform:none; }
+
+    /* MENU */
+    #menu { background: var(--surface); }
+    .menu-header { display:flex; align-items:flex-end; justify-content:space-between; margin-bottom:48px; }
+    .menu-filters { display:flex; gap:9px; flex-wrap:wrap; }
+    .filter-btn {
+      background:transparent; border:1.5px solid var(--border);
+      color:var(--muted); padding:8px 20px; border-radius:50px;
+      font-family:'Barlow',sans-serif; font-size:13px; font-weight:600;
+      letter-spacing:1px; cursor:none; transition:all .25s;
+    }
+    .filter-btn.active,.filter-btn:hover { background:var(--red); border-color:var(--red); color:#fff; }
+
+    .menu-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(295px,1fr)); gap:20px; }
+    .menu-card {
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--radius); overflow:hidden;
+      transition:transform .3s, box-shadow .3s, border-color .3s;
+    }
+    .menu-card:hover { transform:translateY(-8px); box-shadow:0 20px 55px rgba(0,0,0,.45), 0 0 0 1px rgba(200,21,27,.22); border-color:rgba(200,21,27,.3); }
+    .menu-card-img { width:100%; height:208px; object-fit:cover; transition:transform .5s; }
+    .menu-card:hover .menu-card-img { transform:scale(1.06); }
+    .menu-card-body { padding:20px; }
+    .menu-card-badge {
+      display:inline-block; background:rgba(200,21,27,.14);
+      border:1px solid rgba(200,21,27,.3); color:#f08080;
+      font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+      padding:3px 10px; border-radius:50px; margin-bottom:9px;
+    }
+    .menu-card-title { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:1px; margin-bottom:6px; }
+    .menu-card-desc { font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:16px; }
+    .menu-card-footer { display:flex; align-items:center; justify-content:space-between; }
+    .menu-price { font-family:'Bebas Neue',sans-serif; font-size:27px; color:var(--red); letter-spacing:1px; }
+    .menu-price small { font-family:'Barlow',sans-serif; font-size:13px; color:var(--muted); vertical-align:middle; }
+    .add-btn {
+      background:var(--red); color:#fff; border:none;
+      width:40px; height:40px; border-radius:50%; font-size:22px;
+      font-weight:700; cursor:none; display:flex; align-items:center; justify-content:center;
+      transition:background .25s, transform .2s;
+    }
+    .add-btn:hover { background:var(--red-deep); transform:scale(1.15) rotate(90deg); }
+
+    /* SOBRE */
+    #sobre { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+    .about-media { position:relative; }
+    .about-img-main { width:100%; border-radius:22px; object-fit:cover; height:530px; display:block; }
+    .about-img-accent {
+      position:absolute; bottom:-26px; right:-26px;
+      width:180px; height:180px; border-radius:18px; object-fit:cover;
+      border:4px solid var(--bg); box-shadow:0 12px 36px rgba(0,0,0,.55);
+    }
+    .about-tag-float {
+      position:absolute; top:26px; right:-20px;
+      background:var(--red); color:#fff;
+      padding:10px 16px; border-radius:12px;
+      font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:2px;
+      box-shadow:0 8px 24px rgba(200,21,27,.4);
+    }
+    .about-text p { color:rgba(245,237,224,.68); line-height:1.8; margin-bottom:16px; font-size:15px; }
+    .about-text h2 { margin-bottom:18px; }
+    .about-phrase {
+      font-style:italic; font-size:16px; color:rgba(245,237,224,.48);
+      border-left:3px solid var(--red); padding-left:14px; margin:22px 0;
+    }
+    .about-features { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:28px; }
+    .feature-item {
+      background:var(--surface); border:1px solid var(--border); border-radius:12px;
+      padding:15px; display:flex; gap:11px; align-items:flex-start;
+      transition:border-color .3s;
+    }
+    .feature-item:hover { border-color:rgba(200,21,27,.35); }
+    .feature-icon { font-size:22px; }
+    .feature-text-title { font-weight:700; font-size:13px; margin-bottom:3px; }
+    .feature-text-desc { font-size:12px; color:var(--muted); }
+
+    /* GALERIA */
+    #galeria { background:var(--surface); }
+    .gallery-grid {
+      display:grid; grid-template-columns:repeat(4,1fr);
+      grid-template-rows:repeat(2,252px); gap:10px; margin-top:44px;
+    }
+    .gal-item { border-radius:13px; overflow:hidden; position:relative; cursor:none; }
+    .gal-item:nth-child(1) { grid-column:span 2; grid-row:span 2; }
+    .gal-item:nth-child(4) { grid-column:span 2; }
+    .gal-item img { width:100%; height:100%; object-fit:cover; transition:transform .5s; }
+    .gal-item:hover img { transform:scale(1.07); }
+    .gal-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(to top, rgba(10,8,8,.85) 0%, transparent 55%);
+      opacity:0; transition:opacity .35s;
+      display:flex; align-items:flex-end; padding:16px;
+    }
+    .gal-item:hover .gal-overlay { opacity:1; }
+    .gal-overlay span { font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:2px; color:#fff; }
+
+    /* DEPO */
+    #depoimentos { overflow:hidden; }
+    .depo-header { margin-bottom:44px; }
+    .depo-slider { display:flex; gap:20px; transition:transform .5s cubic-bezier(.77,0,.175,1); }
+    .depo-card {
+      min-width:330px; background:var(--card); border:1px solid var(--border);
+      border-radius:18px; padding:28px; flex-shrink:0; transition:border-color .3s;
+    }
+    .depo-card:hover { border-color:rgba(200,21,27,.3); }
+    .depo-stars { color:var(--red); font-size:16px; margin-bottom:13px; }
+    .depo-text { font-size:14px; line-height:1.75; color:rgba(245,237,224,.78); font-style:italic; margin-bottom:20px; }
+    .depo-author { display:flex; align-items:center; gap:11px; }
+    .depo-avatar { width:42px; height:42px; border-radius:50%; object-fit:cover; border:2px solid var(--red); }
+    .depo-name { font-weight:700; font-size:13px; }
+    .depo-role { font-size:11px; color:var(--muted); }
+    .depo-nav { display:flex; align-items:center; gap:11px; margin-top:32px; }
+    .depo-arrow {
+      width:44px; height:44px; border-radius:50%;
+      border:1.5px solid var(--border); background:transparent;
+      color:var(--cream); font-size:17px; cursor:none;
+      display:flex; align-items:center; justify-content:center;
+      transition:background .25s, border-color .25s, color .25s;
+    }
+    .depo-arrow:hover { background:var(--red); border-color:var(--red); color:#fff; }
+    .depo-dots { display:flex; gap:7px; }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--border); transition:background .3s, width .3s; cursor:none; }
+    .dot.active { background:var(--red); width:22px; border-radius:4px; }
+
+    /* LOCALIZAÇÃO */
+    #localizacao { background:var(--surface); display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:center; }
+    .location-info h2 { margin-bottom:26px; }
+    .location-detail { display:flex; align-items:flex-start; gap:13px; margin-bottom:24px; }
+    .location-icon {
+      width:44px; height:44px; background:rgba(200,21,27,.1);
+      border:1px solid rgba(200,21,27,.22); border-radius:10px;
+      display:flex; align-items:center; justify-content:center;
+      font-size:18px; flex-shrink:0;
+    }
+    .location-label { font-size:10px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--muted); margin-bottom:3px; }
+    .location-value { font-size:14px; font-weight:600; line-height:1.65; }
+    .location-actions { display:flex; gap:11px; flex-wrap:wrap; margin-top:6px; }
+    .map-placeholder {
+      background:var(--card); border:1px solid var(--border); border-radius:20px;
+      height:400px; display:flex; align-items:center; justify-content:center;
+      flex-direction:column; gap:12px; cursor:none;
+      transition:border-color .3s; position:relative; overflow:hidden;
+    }
+    .map-placeholder:hover { border-color:var(--red); }
+    .map-ping {
+      position:absolute; width:18px; height:18px;
+      background:var(--red); border-radius:50%; top:50%; left:50%;
+      transform:translate(-50%,-50%); animation:pingAnim 2s infinite;
+    }
+    .map-ping::after {
+      content:''; position:absolute; inset:-8px;
+      border:2px solid var(--red); border-radius:50%;
+      animation:pingRing 2s infinite;
+    }
+    @keyframes pingAnim { 0%,100%{transform:translate(-50%,-50%) scale(1)} 50%{transform:translate(-50%,-50%) scale(1.2)} }
+    @keyframes pingRing { 0%{opacity:1;transform:scale(1)} 100%{opacity:0;transform:scale(2.5)} }
+
+    /* FOOTER */
+    footer {
+      background:var(--bg); border-top:1px solid var(--border);
+      padding:58px 60px; display:grid;
+      grid-template-columns:1.6fr 1fr 1fr 1fr; gap:42px;
+    }
+    .footer-logo-top {
+      font-family:'Black Ops One',sans-serif; font-size:28px;
+      letter-spacing:3px; color:#fff; display:flex; align-items:center; gap:2px;
+      margin-bottom:4px;
+    }
+    .footer-logo-top .red { color:var(--red); }
+    .footer-logo-top .logo-o {
+      position:relative; display:inline-flex; align-items:center; justify-content:center;
+    }
+    .footer-logo-top .logo-o .flame-inner {
+      position:absolute; width:52%; height:52%; color:var(--red);
+    }
+    .footer-logo-sub { font-size:9px; letter-spacing:3.5px; text-transform:uppercase; color:rgba(245,237,224,.38); font-weight:600; margin-bottom:14px; }
+    .footer-desc { font-size:12px; color:var(--muted); line-height:1.7; margin-bottom:20px; max-width:255px; }
+    .social-links { display:flex; gap:9px; }
+    .social-link {
+      width:38px; height:38px; border-radius:50%;
+      border:1px solid var(--border);
+      display:flex; align-items:center; justify-content:center;
+      font-size:15px; text-decoration:none;
+      transition:background .25s, border-color .25s; cursor:none;
+    }
+    .social-link:hover { background:var(--red); border-color:var(--red); }
+    .footer-col h4 { font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:2px; color:var(--red); margin-bottom:16px; }
+    .footer-col ul { list-style:none; display:flex; flex-direction:column; gap:9px; }
+    .footer-col ul li a { color:var(--muted); text-decoration:none; font-size:13px; transition:color .25s; cursor:none; }
+    .footer-col ul li a:hover { color:var(--cream); }
+    .footer-bottom {
+      border-top:1px solid var(--border); padding:16px 60px;
+      display:flex; align-items:center; justify-content:space-between;
+      font-size:11px; color:var(--muted);
+    }
+
+    /* CART */
+    .cart-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,.72); z-index:900;
+      opacity:0; pointer-events:none; transition:opacity .35s; backdrop-filter:blur(4px);
+    }
+    .cart-overlay.open { opacity:1; pointer-events:all; }
+    .cart-panel {
+      position:fixed; top:0; right:-460px; bottom:0; width:420px;
+      background:var(--card); border-left:1px solid var(--border);
+      z-index:901; transition:right .4s cubic-bezier(.77,0,.175,1);
+      display:flex; flex-direction:column; padding:28px;
+    }
+    .cart-panel.open { right:0; }
+    .cart-panel-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:26px; }
+    .cart-panel-title { font-family:'Bebas Neue',sans-serif; font-size:24px; letter-spacing:2px; }
+    .cart-close {
+      width:34px; height:34px; border:1px solid var(--border); border-radius:50%;
+      background:transparent; color:var(--cream); font-size:16px; cursor:none;
+      display:flex; align-items:center; justify-content:center; transition:background .25s;
+    }
+    .cart-close:hover { background:var(--red); border-color:var(--red); }
+    .cart-items { flex:1; overflow-y:auto; }
+    .cart-item { display:flex; align-items:center; gap:11px; padding:12px 0; border-bottom:1px solid var(--border); }
+    .cart-item-img { width:56px; height:56px; border-radius:9px; object-fit:cover; flex-shrink:0; }
+    .cart-item-name { font-weight:700; font-size:13px; }
+    .cart-item-price { font-size:12px; color:var(--red); margin-top:2px; }
+    .cart-item-qty { margin-left:auto; display:flex; align-items:center; gap:7px; }
+    .qty-btn {
+      background:var(--surface); border:1px solid var(--border); color:var(--cream);
+      width:27px; height:27px; border-radius:50%; cursor:none; font-size:14px;
+      display:flex; align-items:center; justify-content:center; transition:background .2s;
+    }
+    .qty-btn:hover { background:var(--red); color:#fff; border-color:var(--red); }
+    .qty-num { font-weight:700; font-size:14px; min-width:18px; text-align:center; }
+    .cart-empty { text-align:center; padding:52px 0; color:var(--muted); }
+    .cart-empty-icon { font-size:46px; margin-bottom:10px; }
+    .cart-empty-text { font-size:13px; }
+    .cart-footer { border-top:1px solid var(--border); padding-top:20px; margin-top:12px; }
+    .cart-total-row { display:flex; justify-content:space-between; margin-bottom:16px; }
+    .cart-total-label { font-size:12px; color:var(--muted); }
+    .cart-total-value { font-family:'Bebas Neue',sans-serif; font-size:25px; color:var(--red); letter-spacing:1px; }
+    .checkout-btn {
+      width:100%; background:var(--red); color:#fff; border:none;
+      padding:14px; border-radius:11px;
+      font-family:'Barlow',sans-serif; font-weight:700; font-size:14px;
+      cursor:none; transition:background .25s, transform .2s;
+    }
+    .checkout-btn:hover { background:var(--red-deep); transform:translateY(-2px); }
+
+    /* TOAST */
+    .toast {
+      position:fixed; bottom:28px; left:50%;
+      transform:translateX(-50%) translateY(100px);
+      background:var(--red); color:#fff;
+      padding:12px 24px; border-radius:50px;
+      font-weight:700; font-size:13px; z-index:9999;
+      transition:transform .4s cubic-bezier(.175,.885,.32,1.275);
+      pointer-events:none; white-space:nowrap;
+    }
+    .toast.show { transform:translateX(-50%) translateY(0); }
+
+    ::-webkit-scrollbar { width:5px; }
+    ::-webkit-scrollbar-track { background:var(--bg); }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+    ::-webkit-scrollbar-thumb:hover { background:var(--red); }
+
+    @media (max-width:900px) {
+      nav { padding:13px 20px; }
+      .nav-links { display:none; }
+      section { padding:62px 22px; }
+      #hero { padding:100px 22px 55px; }
+      .hero-img { display:none; }
+      .hero-stats { gap:22px; }
+      #sobre, #localizacao { grid-template-columns:1fr; gap:34px; }
+      footer { grid-template-columns:1fr 1fr; padding:44px 24px; }
+      .footer-bottom { padding:13px 22px; flex-direction:column; gap:6px; }
+      .menu-header { flex-direction:column; align-items:flex-start; gap:16px; }
+      .gallery-grid { grid-template-columns:1fr 1fr; grid-template-rows:auto; }
+      .gal-item:nth-child(1) { grid-column:span 2; height:200px; }
+      .gal-item:nth-child(4) { grid-column:span 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="cursor"></div>
+<div class="toast" id="toast"></div>
+
+<!-- CART OVERLAY -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-panel" id="cartPanel">
+  <div class="cart-panel-header">
+    <span class="cart-panel-title">🛒 SEU PEDIDO</span>
+    <button class="cart-close" onclick="toggleCart()">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">
+      <div class="cart-empty-icon">🍺</div>
+      <div class="cart-empty-text">Carrinho vazio.<br>Adicione algo do cardápio!</div>
+    </div>
+  </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-total-row">
+      <span class="cart-total-label">Total estimado</span>
+      <span class="cart-total-value" id="cartTotal">R$ 0,00</span>
+    </div>
+    <button class="checkout-btn" onclick="checkout()">💬 Pedir via WhatsApp →</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">
+    <span class="nav-logo-top">
+      L
+      <span class="logo-o">
+        O
+        <svg class="flame-inner" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="6"/>
+          <path d="M50 22 C44 32,34 40,37 53 C39 62,46 65,46 74 C46 80,41 83,37 85 C46 82,56 75,56 64 C56 57,51 53,53 44 C56 34,64 28,63 20 C63 16,56 12,50 22Z" fill="currentColor" opacity="0.9"/>
+          <path d="M39 57 C35 65,37 75,44 81 C39 73,41 65,46 62Z" fill="currentColor" opacity="0.5"/>
+          <path d="M61 57 C65 65,63 75,56 81 C61 73,59 65,54 62Z" fill="currentColor" opacity="0.5"/>
+        </svg>
+      </span>
+      KI<span class="red">'s</span>
+    </span>
+    <span class="nav-logo-bottom">Food &amp; Chopp</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#menu">Cardápio</a></li>
+    <li><a href="#sobre">Sobre</a></li>
+    <li><a href="#galeria">Galeria</a></li>
+    <li><a href="#depoimentos">Reviews</a></li>
+    <li><a href="#localizacao">Localização</a></li>
+  </ul>
+  <button class="nav-cart-btn" onclick="toggleCart()">
+    🛒 Pedido <span class="cart-count" id="cartCount">0</span>
+  </button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grain"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Aberto agora &nbsp;·&nbsp; Todos os dias 17h às 23h</div>
+
+    <div class="hero-logo-wrap">
+      <div class="hero-logo-name">
+        L
+        <span class="logo-o-hero">
+          O
+          <svg class="flame-inner" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="6"/>
+            <path d="M50 22 C44 32,34 40,37 53 C39 62,46 65,46 74 C46 80,41 83,37 85 C46 82,56 75,56 64 C56 57,51 53,53 44 C56 34,64 28,63 20 C63 16,56 12,50 22Z" fill="currentColor" opacity="0.9"/>
+            <path d="M39 57 C35 65,37 75,44 81 C39 73,41 65,46 62Z" fill="currentColor" opacity="0.5"/>
+            <path d="M61 57 C65 65,63 75,56 81 C61 73,59 65,54 62Z" fill="currentColor" opacity="0.5"/>
+          </svg>
+        </span>
+        KI<span class="red">'s</span>
+      </div>
+      <div class="hero-logo-sub">Food &amp; Chopp</div>
+    </div>
+
+    <p class="hero-phrase">"Vivendo ao estilo Loki's de ser"</p>
+
+    <div class="hero-actions">
+      <a href="https://lokis.menudino.com/" target="_blank" class="btn-primary">🍔 Cardápio Digital</a>
+      <a href="https://wa.me/5567998313106?text=Olá!%20Vim%20pelo%20site%20e%20gostaria%20de%20saber%20mais%20😊" target="_blank" class="btn-outline">💬 WhatsApp</a>
+      <a href="#localizacao" class="btn-outline">📍 Localização</a>
+    </div>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-num">4.9★</div>
+        <div class="stat-label">Avaliação</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">17–23h</div>
+        <div class="stat-label">Todo dia</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-num">🍺</div>
+        <div class="stat-label">Chopp gelado</div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-img">
+    <img src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=900&auto=format&fit=crop" alt="Burger Loki's">
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <div class="marquee-item"><span class="mi">🔥</span> SMASH BURGER</div>
+    <div class="marquee-item"><span class="mi">🍺</span> CHOPP GELADO</div>
+    <div class="marquee-item"><span class="mi">🧀</span> CHEESE LOVERS</div>
+    <div class="marquee-item"><span class="mi">🥓</span> BACON CRISPY</div>
+    <div class="marquee-item"><span class="mi">🍟</span> BATATA RÚSTICA</div>
+    <div class="marquee-item"><span class="mi">📍</span> COSTA RICA – MS</div>
+    <div class="marquee-item"><span class="mi">🔥</span> SMASH BURGER</div>
+    <div class="marquee-item"><span class="mi">🍺</span> CHOPP GELADO</div>
+    <div class="marquee-item"><span class="mi">🧀</span> CHEESE LOVERS</div>
+    <div class="marquee-item"><span class="mi">🥓</span> BACON CRISPY</div>
+    <div class="marquee-item"><span class="mi">🍟</span> BATATA RÚSTICA</div>
+    <div class="marquee-item"><span class="mi">📍</span> COSTA RICA – MS</div>
+  </div>
+</div>
+
+<!-- MENU -->
+<section id="menu">
+  <div class="menu-header reveal">
+    <div>
+      <div class="section-tag">— Cardápio</div>
+      <h2>ESCOLHA O<br>SEU FAVORITO</h2>
+    </div>
+    <div class="menu-filters">
+      <button class="filter-btn active" data-filter="all">Todos</button>
+      <button class="filter-btn" data-filter="burger">Burgers</button>
+      <button class="filter-btn" data-filter="chopp">Chopp &amp; Drinks</button>
+      <button class="filter-btn" data-filter="sides">Acompanh.</button>
+    </div>
+  </div>
+  <div class="menu-grid" id="menuGrid"></div>
+  <div style="text-align:center;margin-top:44px" class="reveal">
+    <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Cardápio completo disponível online 👇</p>
+    <a href="https://lokis.menudino.com/" target="_blank" class="btn-primary">📱 Ver Cardápio Completo</a>
+  </div>
+</section>
+
+<!-- SOBRE -->
+<section id="sobre">
+  <div class="about-media reveal">
+    <img class="about-img-main" src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&auto=format&fit=crop" alt="Loki's">
+    <img class="about-img-accent" src="https://images.unsplash.com/photo-1551782450-a2132b4ba21d?w=400&auto=format&fit=crop" alt="Burger">
+    <div class="about-tag-float">COSTA RICA – MS</div>
+  </div>
+  <div class="about-text reveal">
+    <div class="section-tag">— Sobre nós</div>
+    <h2>MUITO ALÉM<br>DE UM BURGER</h2>
+    <div class="about-phrase">"Vivendo ao estilo Loki's de ser"</div>
+    <p>O Loki's Food &amp; Chopp é o lugar onde você vem para relaxar, encontrar a galera e comer muito bem. Um ambiente que acolhe e um cardápio que impressiona.</p>
+    <p>Burgers artesanais feitos na hora, chopp sempre gelado e aquele clima que faz você querer ficar mais um pouquinho. Aqui em Costa Rica - MS, a gente faz questão de cada detalhe da sua experiência.</p>
+    <div class="about-features">
+      <div class="feature-item">
+        <div class="feature-icon">🥩</div>
+        <div><div class="feature-text-title">Carne Artesanal</div><div class="feature-text-desc">Blend especial da casa</div></div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🍺</div>
+        <div><div class="feature-text-title">Chopp Premium</div><div class="feature-text-desc">Sempre na temperatura certa</div></div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🏡</div>
+        <div><div class="feature-text-title">Ambiente Único</div><div class="feature-text-desc">O jeito Loki's de receber</div></div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📍</div>
+        <div><div class="feature-text-title">Costa Rica – MS</div><div class="feature-text-desc">No coração da cidade</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALERIA -->
+<section id="galeria">
+  <div class="reveal">
+    <div class="section-tag">— Galeria</div>
+    <h2>É DE FAZER<br>A BOCA ÁGUA</h2>
+  </div>
+  <div class="gallery-grid reveal">
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=900&auto=format&fit=crop" alt="">
+      <div class="gal-overlay"><span>O CLÁSSICO LOKI'S</span></div>
+    </div>
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1607013251379-e6eecfffe234?w=600&auto=format&fit=crop" alt="">
+      <div class="gal-overlay"><span>DOUBLE SMASH</span></div>
+    </div>
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1612528443702-f6741f70a049?w=600&auto=format&fit=crop" alt="">
+      <div class="gal-overlay"><span>CHOPP GELADO</span></div>
+    </div>
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1550547660-d9450f859349?w=600&auto=format&fit=crop" alt="">
+      <div class="gal-overlay"><span>BACON LOVERS</span></div>
+    </div>
+    <div class="gal-item">
+      <img src="https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&auto=format&fit=crop" alt="">
+      <div class="gal-overlay"><span>BATATA RÚSTICA</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- DEPOIMENTOS -->
+<section id="depoimentos" style="background:var(--surface)">
+  <div class="depo-header reveal">
+    <div class="section-tag">— Reviews</div>
+    <h2>O QUE DIZEM<br>OS LOKIANOS</h2>
+  </div>
+  <div style="overflow:hidden" class="reveal">
+    <div class="depo-slider" id="depoSlider">
+      <div class="depo-card">
+        <div class="depo-stars">★★★★★</div>
+        <div class="depo-text">"Melhor burger de Costa Rica, sem discussão! O smash é outro nível, e o chopp é sempre geladíssimo. Virei frequentador assíduo!"</div>
+        <div class="depo-author">
+          <img class="depo-avatar" src="https://i.pravatar.cc/100?img=1" alt="">
+          <div><div class="depo-name">Rafael Souza</div><div class="depo-role">Cliente fiel</div></div>
+        </div>
+      </div>
+      <div class="depo-card">
+        <div class="depo-stars">★★★★★</div>
+        <div class="depo-text">"Fui com a galera e todo mundo amou. Ambiente incrível, comida deliciosa e atendimento nota 10. O Loki's é o ponto de encontro da cidade!"</div>
+        <div class="depo-author">
+          <img class="depo-avatar" src="https://i.pravatar.cc/100?img=5" alt="">
+          <div><div class="depo-name">Ana Claudia</div><div class="depo-role">Costa Rica - MS</div></div>
+        </div>
+      </div>
+      <div class="depo-card">
+        <div class="depo-stars">★★★★★</div>
+        <div class="depo-text">"O duplo com bacon é absurdo de bom. Chopp impecável. Quem é de Costa Rica sabe que o Loki's é referência mesmo, sem comparação!"</div>
+        <div class="depo-author">
+          <img class="depo-avatar" src="https://i.pravatar.cc/100?img=12" alt="">
+          <div><div class="depo-name">Thiago Mendes</div><div class="depo-role">Google Reviews</div></div>
+        </div>
+      </div>
+      <div class="depo-card">
+        <div class="depo-stars">★★★★★</div>
+        <div class="depo-text">"Depois do trabalho, tomar um chopp gelado e comer bem no Loki's virou ritual. O ambiente tem aquela energia que faz você querer voltar sempre."</div>
+        <div class="depo-author">
+          <img class="depo-avatar" src="https://i.pravatar.cc/100?img=9" alt="">
+          <div><div class="depo-name">Fernanda Lima</div><div class="depo-role">@fe.lima · Instagram</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="depo-nav reveal">
+    <button class="depo-arrow" onclick="slideDepo(-1)">←</button>
+    <div class="depo-dots" id="depoDots"></div>
+    <button class="depo-arrow" onclick="slideDepo(1)">→</button>
+  </div>
+</section>
+
+<!-- LOCALIZAÇÃO -->
+<section id="localizacao">
+  <div class="location-info reveal">
+    <div class="section-tag">— Onde Estamos</div>
+    <h2>VENHA NOS<br>VISITAR</h2>
+    <div class="location-detail">
+      <div class="location-icon">📍</div>
+      <div>
+        <div class="location-label">Endereço</div>
+        <div class="location-value">Av. José Ferreira da Costa, nº 187<br>Centro — Costa Rica, MS · CEP 79550-000</div>
+      </div>
+    </div>
+    <div class="location-detail">
+      <div class="location-icon">⏰</div>
+      <div>
+        <div class="location-label">Horário de Funcionamento</div>
+        <div class="location-value">Todos os dias: 17h às 23h</div>
+      </div>
+    </div>
+    <div class="location-detail">
+      <div class="location-icon">📞</div>
+      <div>
+        <div class="location-label">WhatsApp</div>
+        <div class="location-value">(67) 99831-3106</div>
+      </div>
+    </div>
+    <div class="location-actions">
+      <a href="https://wa.me/5567998313106?text=Olá!%20Vim%20pelo%20site%20do%20Loki's%20e%20gostaria%20de%20fazer%20um%20pedido%20ou%20tirar%20uma%20dúvida%20😊" target="_blank" class="btn-primary">💬 Chamar no WhatsApp</a>
+      <a href="https://lokis.menudino.com/" target="_blank" class="btn-outline">📱 Cardápio Digital</a>
+    </div>
+  </div>
+  <div class="map-placeholder reveal" onclick="openMaps()">
+    <div class="map-ping"></div>
+    <div style="font-size:42px;position:relative;z-index:1">🗺️</div>
+    <div style="color:var(--muted);font-size:13px;position:relative;z-index:1;text-align:center;padding:0 24px;line-height:1.7">
+      <strong style="color:var(--cream);display:block;margin-bottom:4px">Loki's Food &amp; Chopp</strong>
+      Av. José Ferreira da Costa, nº 187<br>Centro · Costa Rica – MS<br><br>
+      <span style="color:var(--red);font-weight:700">Clique para abrir no Maps →</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="footer-logo-top">
+      L
+      <span class="logo-o">
+        O
+        <svg class="flame-inner" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="6"/>
+          <path d="M50 22 C44 32,34 40,37 53 C39 62,46 65,46 74 C46 80,41 83,37 85 C46 82,56 75,56 64 C56 57,51 53,53 44 C56 34,64 28,63 20 C63 16,56 12,50 22Z" fill="currentColor" opacity="0.9"/>
+          <path d="M39 57 C35 65,37 75,44 81 C39 73,41 65,46 62Z" fill="currentColor" opacity="0.5"/>
+          <path d="M61 57 C65 65,63 75,56 81 C61 73,59 65,54 62Z" fill="currentColor" opacity="0.5"/>
+        </svg>
+      </span>
+      KI<span class="red">'s</span>
+    </div>
+    <div class="footer-logo-sub">Food &amp; Chopp</div>
+    <p class="footer-desc">O jeito Loki's de ser é assim: boa comida, chopp gelado e um lugar pra chamar de seu. Costa Rica – MS.</p>
+    <div class="social-links">
+      <a href="https://www.instagram.com/lokis.costarica/" target="_blank" class="social-link" title="Instagram">📸</a>
+      <a href="https://wa.me/5567998313106?text=Olá!%20Vim%20pelo%20site%20do%20Loki's%20😊" target="_blank" class="social-link" title="WhatsApp">💬</a>
+      <a href="https://lokis.menudino.com/" target="_blank" class="social-link" title="Cardápio">🍔</a>
+    </div>
+  </div>
+  <div class="footer-col">
+    <h4>Cardápio</h4>
+    <ul>
+      <li><a href="https://lokis.menudino.com/" target="_blank">Cardápio Completo</a></li>
+      <li><a href="#menu">Smash Burgers</a></li>
+      <li><a href="#menu">Chopp &amp; Drinks</a></li>
+      <li><a href="#menu">Acompanhamentos</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <h4>Loki's</h4>
+    <ul>
+      <li><a href="#sobre">Sobre nós</a></li>
+      <li><a href="#galeria">Galeria</a></li>
+      <li><a href="#depoimentos">Reviews</a></li>
+      <li><a href="https://www.instagram.com/lokis.costarica/" target="_blank">@lokis.costarica</a></li>
+    </ul>
+  </div>
+  <div class="footer-col">
+    <h4>Contato</h4>
+    <ul>
+      <li><a href="https://wa.me/5567998313106" target="_blank">(67) 99831-3106</a></li>
+      <li><a href="#localizacao">Costa Rica – MS</a></li>
+      <li><a href="#localizacao">17h às 23h · Todo dia</a></li>
+      <li><a href="https://maps.google.com/?q=Av.+José+Ferreira+da+Costa+187+Costa+Rica+MS" target="_blank">Ver no Maps</a></li>
+    </ul>
+  </div>
+</footer>
+<div class="footer-bottom">
+  <span>© 2025 Loki's Food &amp; Chopp · Costa Rica, MS</span>
+  <span>"Vivendo ao estilo Loki's de ser"</span>
+</div>
+
+<script>
+  // CURSOR
+  const cursor = document.getElementById('cursor');
+  document.addEventListener('mousemove', e => {
+    cursor.style.left = e.clientX + 'px';
+    cursor.style.top  = e.clientY + 'px';
+  });
+  document.addEventListener('mouseover', e => {
+    if (e.target.closest('a,button,.menu-card,.gal-item,.depo-card,.map-placeholder,.filter-btn,.depo-arrow,.dot,.social-link,.add-btn,.qty-btn'))
+      cursor.classList.add('hovered');
+  });
+  document.addEventListener('mouseout', e => {
+    if (e.target.closest('a,button,.menu-card,.gal-item,.depo-card,.map-placeholder,.filter-btn,.depo-arrow,.dot,.social-link,.add-btn,.qty-btn'))
+      cursor.classList.remove('hovered');
+  });
+
+  // NAV SCROLL
+  window.addEventListener('scroll', () => {
+    document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // REVEAL
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // MENU DATA
+  const menuItems = [
+    { id:1, cat:'burger', name:"CLÁSSICO LOKI'S", desc:'180g de blend smashado, queijo cheddar, cebola caramelizada, alface, tomate e molho especial.', price:32, badge:'⭐ Mais Pedido', img:'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&auto=format&fit=crop' },
+    { id:2, cat:'burger', name:'DOUBLE SMASH',     desc:'360g de blend em dois patties, queijo duplo, bacon crocante e pickle artesanal. Para os corajosos!', price:46, badge:'🔥 Em Alta',    img:'https://images.unsplash.com/photo-1550547660-d9450f859349?w=600&auto=format&fit=crop' },
+    { id:3, cat:'burger', name:'BACON LOVERS',      desc:'180g blend especial, três fatias de bacon defumado, queijo gouda, cebola crispy e BBQ caseiro.', price:38, badge:'🥓 Chef Pick',  img:'https://images.unsplash.com/photo-1595777216528-071e0127ccbf?w=600&auto=format&fit=crop' },
+    { id:4, cat:'chopp',  name:'CHOPP 300ml',       desc:'Chopp de malte premium servido bem gelado. A pedida certa depois de um longo dia de trabalho.', price:12, badge:'🍺 Favorito',   img:'https://images.unsplash.com/photo-1612528443702-f6741f70a049?w=600&auto=format&fit=crop' },
+    { id:5, cat:'chopp',  name:'CHOPP 500ml',       desc:'O chopp maior, para quem quer aproveitar mais. Gelado na medida perfeita, do jeitinho Loki\'s.', price:20, badge:'🍺 Pediu bem',  img:'https://images.unsplash.com/photo-1558642891-54be180ea339?w=600&auto=format&fit=crop' },
+    { id:6, cat:'burger', name:"VEGGIE LOKI'S",     desc:'Blend de grão-de-bico e beterraba, queijo, rúcula, tomate seco e molho especial. Sabor garantido!', price:34, badge:'🌱 Vegano',  img:'https://images.unsplash.com/photo-1520072959219-c595dc870360?w=600&auto=format&fit=crop' },
+    { id:7, cat:'sides',  name:'BATATA RÚSTICA',    desc:'Batatas fritas estilo rústico, temperadas com alecrim, alho e flor de sal. Serve 2 pessoas.', price:22, badge:'🍟 Favorito',   img:'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?w=600&auto=format&fit=crop' },
+    { id:8, cat:'sides',  name:'ONION RINGS',       desc:'Anéis de cebola empanados no panko, crocantes por fora, macios por dentro. Com molho da casa.', price:24, badge:'🧅 Novo',      img:'https://images.unsplash.com/photo-1639024471283-03518883512d?w=600&auto=format&fit=crop' },
+  ];
+
+  let cart = {};
+
+  function renderMenu(filter = 'all') {
+    const grid = document.getElementById('menuGrid');
+    const list = filter === 'all' ? menuItems : menuItems.filter(i => i.cat === filter);
+    grid.innerHTML = '';
+    list.forEach((item, idx) => {
+      const card = document.createElement('div');
+      card.className = 'menu-card';
+      card.innerHTML = `
+        <img class="menu-card-img" src="${item.img}" alt="${item.name}" loading="lazy">
+        <div class="menu-card-body">
+          <div class="menu-card-badge">${item.badge}</div>
+          <div class="menu-card-title">${item.name}</div>
+          <div class="menu-card-desc">${item.desc}</div>
+          <div class="menu-card-footer">
+            <div class="menu-price"><small>R$</small> ${item.price.toFixed(2).replace('.',',')}</div>
+            <button class="add-btn" onclick="addToCart(${item.id})">+</button>
+          </div>
+        </div>`;
+      grid.appendChild(card);
+      const delay = idx * 0.06;
+      card.style.cssText = `opacity:0;transform:translateY(18px);transition:opacity .4s ${delay}s,transform .4s ${delay}s`;
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        card.style.opacity = '1'; card.style.transform = 'none';
+      }));
+    });
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderMenu(btn.dataset.filter);
+    });
+  });
+  renderMenu();
+
+  // CART
+  function addToCart(id) {
+    const item = menuItems.find(i => i.id === id);
+    if (!item) return;
+    cart[id] ? cart[id].qty++ : (cart[id] = { ...item, qty: 1 });
+    updateCartUI();
+    showToast('🍔 ' + item.name + ' adicionado!');
+  }
+  function changeQty(id, d) {
+    if (!cart[id]) return;
+    cart[id].qty += d;
+    if (cart[id].qty <= 0) delete cart[id];
+    updateCartUI();
+  }
+  function updateCartUI() {
+    const ids = Object.keys(cart);
+    const count = ids.reduce((a, k) => a + cart[k].qty, 0);
+    document.getElementById('cartCount').textContent = count;
+    const itemsDiv = document.getElementById('cartItems');
+    const footer   = document.getElementById('cartFooter');
+    if (!ids.length) {
+      itemsDiv.innerHTML = '<div class="cart-empty"><div class="cart-empty-icon">🍺</div><div class="cart-empty-text">Carrinho vazio.<br>Adicione algo do cardápio!</div></div>';
+      footer.style.display = 'none'; return;
+    }
+    let total = 0;
+    itemsDiv.innerHTML = ids.map(k => {
+      const it = cart[k]; total += it.price * it.qty;
+      return `<div class="cart-item">
+        <img class="cart-item-img" src="${it.img}" alt="${it.name}">
+        <div><div class="cart-item-name">${it.name}</div><div class="cart-item-price">R$ ${it.price.toFixed(2).replace('.',',')}</div></div>
+        <div class="cart-item-qty">
+          <button class="qty-btn" onclick="changeQty(${k},-1)">−</button>
+          <span class="qty-num">${it.qty}</span>
+          <button class="qty-btn" onclick="changeQty(${k},1)">+</button>
+        </div>
+      </div>`;
+    }).join('');
+    document.getElementById('cartTotal').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+    footer.style.display = 'block';
+  }
+  function toggleCart() {
+    document.getElementById('cartPanel').classList.toggle('open');
+    document.getElementById('cartOverlay').classList.toggle('open');
+  }
+  function checkout() {
+    const items = Object.values(cart);
+    if (!items.length) return;
+    const msg  = items.map(i => `${i.qty}x ${i.name} — R$ ${(i.price*i.qty).toFixed(2).replace('.',',')}`).join('\n');
+    const total = items.reduce((a, i) => a + i.price * i.qty, 0);
+    const text = encodeURIComponent("Olá, Loki's! Gostaria de fazer o seguinte pedido:\n\n" + msg + "\n\nTotal: R$ " + total.toFixed(2).replace('.', ',') + "\n\nAguardo confirmação 😊");
+    window.open('https://wa.me/5567998313106?text=' + text, '_blank');
+  }
+
+  // TOAST
+  let toastTimer;
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2400);
+  }
+
+  // DEPO SLIDER
+  let depoIdx = 0;
+  const slider = document.getElementById('depoSlider');
+  const cards  = slider.querySelectorAll('.depo-card');
+  const dotsEl = document.getElementById('depoDots');
+  cards.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.onclick = () => goToDepo(i);
+    dotsEl.appendChild(d);
+  });
+  function slideDepo(dir) { goToDepo((depoIdx + dir + cards.length) % cards.length); }
+  function goToDepo(idx) {
+    depoIdx = idx;
+    slider.style.transform = `translateX(-${idx * (cards[0].offsetWidth + 20)}px)`;
+    document.querySelectorAll('.dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+  }
+
+  // MAPS
+  function openMaps() {
+    window.open('https://maps.google.com/?q=Av.+José+Ferreira+da+Costa+187+Costa+Rica+MS', '_blank');
+  }
+</script>
+</body>
+</html>
